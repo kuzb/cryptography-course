@@ -1,4 +1,4 @@
-from RSA_OAEP import *
+from RSA_OAEP import RSA_OAEP_Enc, k0
 
 # public key encryption
 e = 65537
@@ -9,13 +9,17 @@ N = 7021228402647655128749786734466017306224261993530699760798598742835205291129
 # ciphertext
 c = 60400943706823506830284280114139818288715016023417103465230780522075862090739
 
+print("We are given")
+print("public key encryption, e:",e)
+print("public, N:",N)
+print("ciphertext c:",c)
 # Ranges for 8 bit int
 k1 = 2**(k0-1)
 k2 = 2**k0-1
 
-# Pin is 4 digit so it has to be between 1000 and 9000
+print("Pin is 4 digit so it has to be between 1000 and 9000")
 for pin in range(1000, 9999):
     for r in range(k1,k2):
         if c == RSA_OAEP_Enc(pin, e, N, r):
             print("Pin is found:", pin)
-
+            break

@@ -1,5 +1,7 @@
 # Cryptography-Course-Projects
 
+# WRITE DOWN WHICH FILE IS ABOUT WHICH SUBJECT
+
 - Homework 1:
 Shift cipher, Affine cipher, Vigenere cipher.
 
@@ -10,4 +12,5 @@ Modulus group, Modulos congruences, LFSR.
 AES and irreducible polynomials, Rainbow Tables, Deterministic RSA, Probabilistic RSA.
 
 - Homework 4:
-RSA-OAEP, EGamal, Kerberos, RSA signature (forward secrecy) 
+    ElGamal.py, DSA.py, RSA_OAEP.py were given by assignment
+    RSA-OAEP, EGamal, Kerberos, RSA signature (forward secrecy) 
