@@ -6,24 +6,27 @@ from Crypto.Hash import SHA256
 from Crypto import Random
 import json
 
-def Reduction(x, Alphabet, length):
-  pwd = ""
-  t = x
-  size = len(Alphabet)
-  for j in range(0,length):
-    pwd += Alphabet[t%size]
-    t = t//size
-  return pwd  
 
-Alphabet = {0:'A', 1:'B', 2:'C', 3:'D', 4:'E', 5:'F', 6:'G', 7:'H', 8:'I', 9:'J', 10:'K', 11:'L', 12:'M', 13:'N', 14:'O', 15:'P', 16:'Q', 17:'R', 18:'S', 19:'T', 20:'U', 21:'V', 22:'W', 23:'X', 24:'Y', 25:'Z', 26:'.', 27:',', 28:'!', 29:'?'}
+def Reduction(x, Alphabet, length):
+    pwd = ""
+    t = x
+    size = len(Alphabet)
+    for j in range(0, length):
+        pwd += Alphabet[t % size]
+        t = t//size
+    return pwd
+
+
+Alphabet = {0: 'A', 1: 'B', 2: 'C', 3: 'D', 4: 'E', 5: 'F', 6: 'G', 7: 'H', 8: 'I', 9: 'J', 10: 'K', 11: 'L', 12: 'M', 13: 'N', 14: 'O',
+            15: 'P', 16: 'Q', 17: 'R', 18: 'S', 19: 'T', 20: 'U', 21: 'V', 22: 'W', 23: 'X', 24: 'Y', 25: 'Z', 26: '.', 27: ',', 28: '!', 29: '?'}
 alpha_len = len(Alphabet)
 pwd_len = 6
-pwd_space = alpha_len**pwd_len 
+pwd_space = alpha_len**pwd_len
 t = 2**16
 m = 2*(pwd_space//t)
 
 # Read the rainbow table
-f = open("rainbowtable.txt","r")
+f = open("rainbowtable.txt", "r")
 Rainbow_Table = json.loads(f.read())
 f.close()
 
@@ -45,22 +48,22 @@ print("The mission is to find six-character passwords that correspond to these d
 
 print("\nCracking has began")
 for d in digest:
-  dig = d
-  i = 0
-  notfound = True
-  while notfound:
-    reduced = Reduction(dig%pwd_space, Alphabet, pwd_len)
-    for a in range(0, len(Rainbow_Table)):
-      if Rainbow_Table[a][1] == reduced:
-        print("\n")
-        print("Table Entry:", Rainbow_Table[a])
-        print("Initial Digest:", d)
-        print("Number of times it is hashed and reduced:", i)
-        print("Last Reduction:", reduced)
-        print("Thus password is", Rainbow_Table[a][0])
-        notfound = False
-        break
-    hash = SHA256.new(reduced.encode('utf-8')) # hash it
-    dig = int.from_bytes(hash.digest(), byteorder='big') # convert the hash into an integer
-    i = i + 1
-
+    dig = d
+    i = 0
+    notfound = True
+    while notfound:
+        reduced = Reduction(dig % pwd_space, Alphabet, pwd_len)
+        for a in range(0, len(Rainbow_Table)):
+            if Rainbow_Table[a][1] == reduced:
+                print("\n")
+                print("Table Entry:", Rainbow_Table[a])
+                print("Initial Digest:", d)
+                print("Number of times it is hashed and reduced:", i)
+                print("Last Reduction:", reduced)
+                print("Thus password is", Rainbow_Table[a][0])
+                notfound = False
+                break
+        hash = SHA256.new(reduced.encode('utf-8'))  # hash it
+        # convert the hash into an integer
+        dig = int.from_bytes(hash.digest(), byteorder='big')
+        i = i + 1
