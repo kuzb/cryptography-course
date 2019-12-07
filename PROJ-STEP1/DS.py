@@ -5,7 +5,7 @@ import string
 import warnings
 import pyprimes
 from Crypto.Hash import SHA3_256
-from Crypto.Util import number
+from Crypto.Util import number as crypt
 
 def egcd(a, b):
     x, y, u, v = 0, 1, 1, 0
@@ -26,10 +26,10 @@ def modinv(a, m):
 # returns "p" s.t. q|p-1
 def getLargeDLprime(q, bitsize):
     while True:
-        k = number.getRandomNBitInteger(bitsize)
+        k = crypt.getRandomNBitInteger(bitsize)
         # using q here because q|p-1, where p must be also prime
         p = q * k + 1
-        if number.isPrime(p):
+        if crypt.isPrime(p):
             return p
 
 # Creates random string of ASCII character of length "size"
@@ -42,7 +42,7 @@ def random_string(size):
 # and g is primitive element i.e. g^q = 1 mod p 
 # and g can generate subgroup of Zp* with q elements
 def GenerateParams(qsize, psize):
-    q = number.getPrime(qsize)
+    q = crypt.getPrime(qsize)
     p = getLargeDLprime(q, psize - qsize) 
 
     tmp = (p-1)//q
