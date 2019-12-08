@@ -16,7 +16,14 @@
     - Topics: RSA-OAEP, EGamal, Kerberos, RSA signature (forward secrecy) 
 
 - Project:
-    - PhaseI_test.py, pubparams.txt, TestSet.txt, transactions.txt were given by assignment
     + Step 1:
+        - PhaseI_test.py, pubparams.txt, TestSet.txt, transactions.txt were given by assignment
         - DS.py: includes functions for signing given any message and verifying the signature
         - Tx.py: includes functions for generating a random Blockchain transaction
+    + Step 2:
+        - block_sample.txt, PhaseII_Test.py, pubparams.txt, transactions_sample.txt were given by the assingment
+        - DS.py: It is same as previous step
+        - Tx.py: Can generated requested number of transactions
+        - PoW.py: includes functions for running PoW for approving block of transactions
+        - MerkleTree.py: Implements Merkle Tree for finding hash root of block of transactions
+
