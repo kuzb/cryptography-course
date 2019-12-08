@@ -56,13 +56,13 @@ def PoW(PoWLen, q, p, g, TxCnt, filename):
 
         # if real solutions exist, we are done!
         if len(solutions) > 0:
-            print(solutions)
             break
 
         # couldn't find a solution, so increment nonce for next round
         nonce += processes * batchSize
 
 
+    # Get one of the solutions
     nonce = solutions.pop()
 
     if os.path.isfile(filename):

@@ -85,11 +85,10 @@ def KeyGen(q, p, g):
 def SignGen(message, q, p, g, alpha):
     message = message.decode("utf-8")
     h = SHA3_256.new(bytes(str(message), 'utf-8'))
-    h = int(h.hexdigest(), 16)
-
+    h = int(h.hexdigest(), 16) 
     k = random.randint(1, q - 2)
     r = pow(g,k,p) % q
-    s = (alpha * r) - (k * h) % q
+    s = ((alpha * r) - (k * h)) % q
     return s, r
 
 # verifies message with given produre in the assignment
