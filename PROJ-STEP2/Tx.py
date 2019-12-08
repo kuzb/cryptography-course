@@ -37,5 +37,3 @@ def gen_random_txblock(q,p,g,TxCnt,filename):
     f.write(transactions)
     
     f.close()
-
-

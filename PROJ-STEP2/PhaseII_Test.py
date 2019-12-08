@@ -112,7 +112,7 @@ else:
 # Test 3
 # This is for generating a PoW for the block in transactions.txt
 # You should have a function called "PoW" in file PoW.py
-PoWLen = 3   # The number of 0 hexadecimal digits; i.e. PoWLen
+PoWLen = 10   # The number of 0 hexadecimal digits; i.e. PoWLen
 block = PoW.PoW(PoWLen, q, p, g, TxCnt, "transactions.txt")
 f = open("block.txt", "w")
 f.write(block)

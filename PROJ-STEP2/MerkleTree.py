@@ -11,13 +11,11 @@ class MerkleTree(object):
         self.leaves = [Node(self.hashFunc(leaf)) for leaf in leaves]
         self.root = None
 
-    def __eq__(self, obj):
-        return (self.root.data == obj.root.val) and (self.__class__ == obj.__class__)
-
     def build(self):
         if not self.leaves:
             raise MerkleError('The tree has no leaves and cannot be calculated.')
 
+        # Moving buttom up, layer by layer
         layer = self.leaves[::]
         while len(layer) != 1:
             layer = self._build(layer)
