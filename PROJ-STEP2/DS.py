@@ -89,7 +89,7 @@ def SignGen(message, q, p, g, alpha):
 
     k = random.randint(1, q - 2)
     r = pow(g,k,p) % q
-    s = (alpha * r) - (k * h)
+    s = (alpha * r) - (k * h) % q
     return s, r
 
 # verifies message with given produre in the assignment
