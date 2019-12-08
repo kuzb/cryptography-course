@@ -1,75 +1,69 @@
-import os
 import random
+import os
+from multiprocessing import Pool
+from time import time
 from Crypto.Hash import SHA3_256
 from MerkleTree import MerkleTree
 from DS import SignGen, KeyGen
-from multiprocessing import Pool
-from hashlib import sha256
-from time import time
+
 
 def getHash(message):
-    return SHA3_256.new(bytes(str(message), 'utf-8')).hexdigest()
-    # return hashlib.sha3_256(message).hexdigest()
-#     # h = SHA3_256.new(bytes(str(message), 'utf-8'))
-#     # return str(h.hexdigest())
+    return (SHA3_256.new(bytes(str(message), "UTF-8"))).hexdigest()
 
+# Checks for suitable nonce in range of nonceRange
+def _PoW(args):
+    PowLen, root, nonceRange = args
 
-# def PoWPre(q, p, g, TxCnt, filename):
-#     TxLen = 7
+    powValue = ""
+    for nonce in range(nonceRange[0], nonceRange[1]):
+        powValue = getHash(root + str(nonce))
+        if powValue != "" and powValue[:PowLen] == PowLen*"0":
+            # found suitable nonce in range
+            return nonce
 
-#     file = open(filename, "r")
-#     lines = file.readlines()
-#     file.close()
-
-#     hashTree = []
-#     for i in range(0,TxCnt):
-#         transaction = "".join(lines[i*TxLen:(i+1)*TxLen])
-#         hashTree.append(getHash(transaction))
-
-#     t = TxCnt
-#     j = 0
-#     while (t>1):
-#         for i in range(j,j+t,2):
-#             hashTree.append(getHash(hashTree[i]+hashTree[i+1]))
-#         j += t
-#         t = t>>1
-
-#     root_hash = hashTree[2*TxCnt-2]
-   
-#     return root_hash
-
-def PoWPre(q, p, g, TxCnt, filename):
-    if os.path.isfile(filename):
-        f = open(filename, "r")
-        file = f.readlines()
-        f.close()
-
-        # each transaction is 7 lines
-        TxLen = 7
-        # list of transactions
-        transactions = [''.join(file[n:n+TxLen])
-                        for n in range(0, TxLen*TxCnt, TxLen)]
-
-        # transactions = [t.replace('\n','') for t in transactions]
-        # transactions = [t.strip('\n') for t in transactions]
-        # transactions = [t.encode("UTF-8") for t in transactions]
-
-        # print(transactions[0])
-
-        merkle = MerkleTree(transactions, getHash)
-        root = merkle.build()
-
-        return root
-
+    # couldn't find suitable nonce
+    return None
 
 def PoW(PoWLen, q, p, g, TxCnt, filename):
+    # hash root of merkle tree for given transaction in "filename"
     root = PoWPre(q, p, g, TxCnt, filename)
 
-    nonce = ""
-    powValue = ""
-    while powValue == "" or powValue[:PoWLen] != PoWLen*"0":
-        nonce = str(random.getrandbits(128))
-        powValue = getHash(str(root) + str(nonce))
+    # number of processes
+    processes = 6
+    # size of input each process will move over
+    batchSize = 2**20
+    pool = Pool(processes)
+
+    # Nonce begins from smalles 120 bit integer
+    nonce = int('1'+ 119*"0",2)
+
+    solutions = []
+    while True:
+        nonceRanges = [
+            (nonce + i * batchSize,
+             nonce + (i+1) * batchSize)
+            for i in range(processes)
+        ]
+
+        params = [
+            (PoWLen, root, nonceRange) for nonceRange in nonceRanges
+        ]
+
+        solutions = pool.map(_PoW, params)
+
+        # filter out non None solutions
+        solutions = list( filter(None, solutions) )
+
+        # if real solutions exist, we are done!
+        if len(solutions) > 0:
+            print(solutions)
+            break
+
+        # couldn't find a solution, so increment nonce for next round
+        nonce += processes * batchSize
+
+
+    nonce = solutions.pop()
 
     if os.path.isfile(filename):
         f = open(filename, "r")
@@ -77,28 +71,9 @@ def PoW(PoWLen, q, p, g, TxCnt, filename):
         f.close()
 
     text = ''.join(file[::])
-    text += "Nonce: " + nonce + "\n"
+    text += "Nonce: " + str(nonce) 
 
     return text
-
-# def PoW(PoWLen, q, p, g, TxCnt, filename):
-#     root = PoWPre(q, p, g, TxCnt, filename)
-
-#     nonce = ""
-#     powValue = ""
-#     while powValue == "" or powValue[:PoWLen] != PoWLen*"0":
-#         nonce = str(random.getrandbits(128))
-#         powValue = getHash(str(root) + str(nonce))
-
-#     if os.path.isfile(filename):
-#         f = open(filename, "r")
-#         file = f.readlines()
-#         f.close()
-
-#     text = ''.join(file[::])
-#     text += "Nonce: " + nonce + "\n"
-
-#     return text
 
 
 def CheckPow(p, q, g, PoWLen, TxCnt, filename):
@@ -114,32 +89,30 @@ def CheckPow(p, q, g, PoWLen, TxCnt, filename):
         num = int(''.join(filter(str.isdigit, lastLine)))
         nonce = str(num)
 
-        print(nonce)
-        powValue = getHash(str(root) + nonce )
+        powValue = getHash(str(root) + nonce)
 
         if powValue == "" or powValue[:PoWLen] != "0"*PoWLen:
-            print(powValue)
+            # nonce is not suitable for our requirments
             return ""
         else:
             return powValue
 
-# def CheckPow(p, q, g, PoWLen, TxCnt, filename):
-#     root = PoWPre(q, p, g, TxCnt, filename)
 
-#     if os.path.isfile(filename):
-#         f = open(filename, "r")
-#         file = f.readlines()
-#         f.close()
+def PoWPre(q, p, g, TxCnt, filename):
+    if os.path.isfile(filename):
+        f = open(filename, "r")
+        file = f.readlines()
+        f.close()
 
-#         # Getting nonce from the lastline
-#         lastLine = file[-1]
-#         num = int(''.join(filter(str.isdigit, lastLine)))
-#         nonce = str(num)
+        # each transaction is 7 lines
+        TxLen = 7
 
-#         powValue = getHash(str(root) + str(nonce))
+        # list of transactions
+        transactions = [''.join(file[n:n+TxLen])
+                        for n in range(0, TxLen*TxCnt, TxLen)]
 
-#         if powValue == "" or powValue[:PoWLen] != "0"*PoWLen:
-#             return ""
-#         else:
-#             return powValue
+        merkle = MerkleTree(transactions, getHash)
+        # root is merkle tree root
+        root = merkle.build()
 
+        return root
