@@ -26,4 +26,6 @@
         - Tx.py: Can generated requested number of transactions
         - PoW.py: includes functions for running PoW for approving block of transactions
         - MerkleTree.py: Implements Merkle Tree for finding hash root of block of transactions
+    + Step 3:
+        - Block{0-4}.txt, ECC_Sample.py, PhaseIII_Test,py, transactions.txt were given by the assignment 
 
