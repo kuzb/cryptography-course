@@ -28,4 +28,7 @@
         - MerkleTree.py: Implements Merkle Tree for finding hash root of block of transactions
     + Step 3:
         - Block{0-4}.txt, ECC_Sample.py, PhaseIII_Test,py, transactions.txt were given by the assignment 
+        - MerkleTree.py: Implements Merkle Tree for finding hash root of block of transactions
+        - ECDSA.py: Implements Digital Signiture mechanism using Elliptic Curve
+        - ChainGen.py: Returns new block using block candidate and PoW of previous block
 
