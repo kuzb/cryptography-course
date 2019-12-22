@@ -1,9 +1,4 @@
-import os
-import random
 from multiprocessing import Pool
-from time import time 
-import string
-import math
 from Crypto.Hash import SHA3_256
 from MerkleTree import MerkleTree
 
@@ -13,30 +8,31 @@ def getDigest(message):
 def getHexdigest(message):
     return (SHA3_256.new(message)).hexdigest()
 
-def AddBlock2Chain(PoWLen, TxCount, block_candidate, PrevBlock):
+def AddBlock2Chain(PoWLen, TxCount, BlockCandidate, PrevBlock):
     if len(PrevBlock) == 0:
         PrevPoW = '00000000000000000000'   
     else:
-        H_r = getRoot(TxCount, PrevBlock, 9) #get Hash root 
-        
-        PrevPoW = PrevBlock[-2][14:-1]
-        nonce = int(PrevBlock[-1][7:-1])
-        PrevPoW = PrevPoW.encode('UTF-8') #cast to bytes
-        digest = H_r + PrevPoW + nonce.to_bytes((nonce.bit_length()+7)//8, byteorder = 'big')
+        root = getRoot(TxCount, PrevBlock, 9) 
+       
+        # Getting nonce from the lastline
+        nonce = int(''.join(filter(str.isdigit, PrevBlock[-1])))
+        # Getting PoW of previous Block from 2nd lastline
+        PrevPoW =  ( PrevBlock[-2].rsplit(': ', 1)[1] ).strip('\n')
+
+        digest = root + PrevPoW.encode('utf-8') + nonce.to_bytes((nonce.bit_length()+7)//8, byteorder = 'big')
         PrevPoW = SHA3_256.new(digest).hexdigest()
     
-    HR = getRoot(TxCount, block_candidate, 9) 
+    root = getRoot(TxCount, BlockCandidate, 9) 
     
-    #Result Block
-    responseBlock = "".join(block_candidate) 
-    responseBlock += "Previous PoW: " + str(PrevPoW)
-    responseBlock += "\n"
+    text = "".join(BlockCandidate) 
+    text += "Previous PoW: " + str(PrevPoW)
+    text += "\n"
     
-    nonce = getNonce(HR, PrevPoW, PoWLen) #Perfect nonce
+    nonce = getNonce(root, PrevPoW, PoWLen)
     
-    responseBlock += "Nonce: " + str(nonce) #Add to block
-    responseBlock += " \n"
-    return (str(responseBlock)), PrevPoW   
+    text += "Nonce: " + str(nonce) 
+    text += " \n"
+    return text, PrevPoW   
 
 def getRoot(TxCnt, Block, TxLen):
     # list of transactions
