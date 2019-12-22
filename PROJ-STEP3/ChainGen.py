@@ -9,20 +9,21 @@ def getHexdigest(message):
     return (SHA3_256.new(message)).hexdigest()
 
 def AddBlock2Chain(PoWLen, TxCount, BlockCandidate, PrevBlock):
+    TxLen = 9
     if len(PrevBlock) == 0:
         PrevPoW = '00000000000000000000'   
     else:
-        root = getRoot(TxCount, PrevBlock, 9) 
+        root = getRoot(TxCount, PrevBlock, TxLen ) 
        
         # Getting nonce from the lastline
         nonce = int(''.join(filter(str.isdigit, PrevBlock[-1])))
         # Getting PoW of previous Block from 2nd lastline
         PrevPoW =  ( PrevBlock[-2].rsplit(': ', 1)[1] ).strip('\n')
 
-        digest = root + PrevPoW.encode('utf-8') + nonce.to_bytes((nonce.bit_length()+7)//8, byteorder = 'big')
-        PrevPoW = SHA3_256.new(digest).hexdigest()
+        PrevPoW = getHexdigest(root + PrevPoW.encode('utf-8') + nonce.to_bytes((nonce.bit_length()+7)//8, byteorder = 'big'))
+        # PrevPoW = SHA3_256.new(digest).hexdigest()
     
-    root = getRoot(TxCount, BlockCandidate, 9) 
+    root = getRoot(TxCount, BlockCandidate, TxLen ) 
     
     text = "".join(BlockCandidate) 
     text += "Previous PoW: " + str(PrevPoW)

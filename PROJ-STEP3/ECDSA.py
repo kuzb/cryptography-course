@@ -20,6 +20,9 @@ def modinv(a, m):
 def getDigest(message):
     return (SHA3_256.new(message)).digest()
 
+def getDigestInOrder(message, order):
+    return int.from_bytes( getDigest(message), byteorder='big') % order
+
 def getHexdigest(message):
     return (SHA3_256.new(message)).hexdigest()
 
@@ -28,17 +31,19 @@ def SignGen(message, E, sA):
     # number of EC points on the curve
     order = E.order
     # G is going to be used for scalar multiplication on the curve
-    G = E.generator
+    generator = E.generator
 
-    h = int.from_bytes( getDigest(message), byteorder='big') % order
+    digest = getDigestInOrder(message, order)
 
-    k = random.randint(1, order-1) 
+    randomInt = random.randint(1, order) 
 
-    R = (k*G)  
-    # random point on the curve
+    # random point on the elliptic curve
+    R = (randomInt*generator)  
     r = ((R.x) % order)
+
     # signature proof
-    s = (r*sA - h*k) % order
+    s = (r*sA - digest*randomInt) % order
+
     return s, r
 
 # verifies signature
@@ -46,28 +51,29 @@ def SignVer(message, s, r, E, QA):
     # number of EC points on the curve
     order = E.order
     # G is going to be used for scalar multiplication on the curve
-    G = E.generator
+    generator = E.generator
 
-    h = int.from_bytes( getDigest(message), byteorder='big') % order
+    digest = getDigestInOrder(message, order)
 
-    invH = modinv(h, order) % order
+    invH = modinv(digest, order) % order
     z1 = (s*invH) % order
     z2 = (r*invH) % order
 
     # recover the random point used during the signing
-    R = (order-z1)*G + z2*QA
-    R = R.x % order
+    rPrime = (order-z1)*generator + z2*QA
+    rPrime = rPrime.x % order
 
-    return 0 if r == R else -1
+    return 0 if r == rPrime else -1
 
 # generate a secret/public key pair
 def KeyGen(E):
     # number of EC points on the curve
     order = E.order
     # G is going to be used for scalar multiplication on the curve
-    G = E.generator
+    generator = E.generator
     # private key
     sA = random.randint(0,order)
     # public key(EC point)
-    QA = sA*G
+    QA = sA*generator
+
     return sA, QA
