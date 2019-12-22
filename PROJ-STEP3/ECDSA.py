@@ -1,12 +1,5 @@
 import random
-import sys
-from ecpy.curves import Curve,Point
-from ecpy.keys import ECPublicKey, ECPrivateKey
-from ecpy.ecdsa import ECDSA
-from ecpy.formatters import decode_sig, encode_sig
-
 from Crypto.Hash import SHA3_256
-from Crypto.Util import number as crypt
 
 def egcd(a, b):
     x, y, u, v = 0, 1, 1, 0
@@ -29,30 +22,43 @@ def getDigest(message):
 
 def getHexdigest(message):
     return (SHA3_256.new(message)).hexdigest()
+
 # generate signature
 def SignGen(message, E, sA):
+    # number of EC points on the curve
     order = E.order
+    # G is going to be used for scalar multiplication on the curve
     G = E.generator
+
     h = int.from_bytes( getDigest(message), byteorder='big') % order
 
-    randInt = random.randint(1, order-1) #random int 
-    R = (randInt*G)  #random point on curve
+    k = random.randint(1, order-1) 
+
+    R = (k*G)  
+    # random point on the curve
     r = ((R.x) % order)
-    s = (r*sA - h*randInt) % order
+    # signature proof
+    s = (r*sA - h*k) % order
     return s, r
 
 # verifies signature
 def SignVer(message, s, r, E, QA):
+    # number of EC points on the curve
     order = E.order
+    # G is going to be used for scalar multiplication on the curve
     G = E.generator
+
     h = int.from_bytes( getDigest(message), byteorder='big') % order
 
-    inverse_h = modinv(h, order) % order
-    z1 = (s*inverse_h) % order
-    z2 = (r*inverse_h) % order
+    invH = modinv(h, order) % order
+    z1 = (s*invH) % order
+    z2 = (r*invH) % order
+
+    # recover the random point used during the signing
     R = (order-z1)*G + z2*QA
-    u = R.x % order
-    return 0 if u == r else -1
+    R = R.x % order
+
+    return 0 if r == R else -1
 
 # generate a secret/public key pair
 def KeyGen(E):
