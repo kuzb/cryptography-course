@@ -1,6 +1,4 @@
-# Cryptography-Course-Projects
-
-# WRITE DOWN WHICH FILE IS ABOUT WHICH SUBJECT
+# Cryptography Course Projects/Homeworks
 
 - Homework 1:
     - Topics: Shift cipher, Affine cipher, Vigenere cipher.
